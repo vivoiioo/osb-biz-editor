@@ -117,77 +117,59 @@ public class ChangeBusinessService {
 						
 						System.out.println("WorkManager do servico "+ bsQuery.getLocalName()+ ": " + httpEndPointConf.getDispatchPolicy());
 						
-						if( httpEndPointConf.getDispatchPolicy() == null || !httpEndPointConf.getDispatchPolicy().equalsIgnoreCase(workmanager)){
-											
-							switch (operacao) {
-							case 1:
-								// setando o workmanager
-								httpEndPointConf.setDispatchPolicy(workmanager);
 								
-								outboundProps = httpEndPointConf
-										.getOutboundProperties();
-								break;
-								
-							case 2:
-								outboundProps = httpEndPointConf
-								.getOutboundProperties();
-								
-								// setando connection timeout
-								outboundProps
-								.setConnectionTimeout(connectionTimeout);
-								break;
-								
-							case 3:
+						switch (operacao) {
+						case 1:
+							if ( httpEndPointConf.getDispatchPolicy() == null || !httpEndPointConf.getDispatchPolicy().equalsIgnoreCase(workmanager) ) {
 								// setando o workmanager
 								httpEndPointConf.setDispatchPolicy(workmanager);
 								
 								outboundProps = httpEndPointConf
 										.getOutboundProperties();
 								
-								// setando connection timeout
-								outboundProps
-								.setConnectionTimeout(connectionTimeout);
-								
-								break;
-								
-							default:
-								outboundProps = httpEndPointConf
-								.getOutboundProperties();
-								break;
+								updateBiz(httpEndPointConf, outboundProps, endpointConfigration, serviceConfigMBean, bsRef, serviceDef, start, bsQuery);
+								contador++;
+							} else {
+								dontUpdateBiz(start, bsQuery);
 							}
+							break;
 							
-							httpEndPointConf.setOutboundProperties(outboundProps);
-
-							endpointConfigration
-									.setProviderSpecific(httpEndPointConf);
-
-							serviceConfigMBean.updateService(bsRef, serviceDef);
+						case 2:
 							
-							long finish = System.currentTimeMillis();
+							outboundProps = httpEndPointConf.getOutboundProperties();
 							
-							long total = finish - start;
+							if ( outboundProps.getConnectionTimeout() != 5 ) {						
+								// setando connection timeout
+								outboundProps
+								.setConnectionTimeout(connectionTimeout);
+								
+								updateBiz(httpEndPointConf, outboundProps, endpointConfigration, serviceConfigMBean, bsRef, serviceDef, start, bsQuery);
+								contador++;
+							} else {
+								dontUpdateBiz(start, bsQuery);
+							}
+							break;
 							
-							double totalSegundos = total/1000;
-							
-							System.out.println("Tempo total com alteração do BusinessService " + bsQuery.getLocalName() + " : " + totalSegundos + " segundos." );
-
-							contador++;
-						
-							
-						}else{
-							long finish = System.currentTimeMillis();
-							long total = finish - start;
-							double totalSegundos = total/1000;
-							System.out.println("Tempo total sem alteração do BusinessService " + bsQuery.getLocalName() + " : " + totalSegundos + " segundos." );
-							System.out.println("BusinessService " +bsQuery.getLocalName() + " nao foi alterado.");
+						case 3:
+							outboundProps = httpEndPointConf.getOutboundProperties();
+							if 		(( httpEndPointConf.getDispatchPolicy() == null 	|| !httpEndPointConf.getDispatchPolicy().equalsIgnoreCase(workmanager) ) || 
+									 ( outboundProps.getConnectionTimeout() != 5 )) {
+								// setando o workmanager
+								httpEndPointConf.setDispatchPolicy(workmanager);
+								
+								// setando connection timeout
+								outboundProps
+								.setConnectionTimeout(connectionTimeout);
+								
+								updateBiz(httpEndPointConf, outboundProps, endpointConfigration, serviceConfigMBean, bsRef, serviceDef, start, bsQuery);
+								contador++;
+							} else {
+								dontUpdateBiz(start, bsQuery);
+							}
+							break;
 						}
-
-						
-
 					}
-
 				}
-
 			}
 			if(contador == 0){
 				sm.discardSession(sess1);
@@ -217,6 +199,36 @@ public class ChangeBusinessService {
 
 		}
 
+	}
+	
+	public static void updateBiz(
+			HttpEndPointConfiguration httpEndPointConf, 
+			HttpOutboundPropertiesType outboundProps, 
+			EndPointConfiguration endpointConfigration, 
+			ServiceConfigurationMBean serviceConfigMBean, 
+			com.bea.wli.config.Ref bsRef,
+			com.bea.wli.sb.services.ServiceDefinition serviceDef,
+			long start,
+			BusinessServiceQuery bsQuery) 
+	throws Exception{
+		httpEndPointConf.setOutboundProperties(outboundProps);
+		endpointConfigration
+				.setProviderSpecific(httpEndPointConf);
+		serviceConfigMBean.updateService(bsRef, serviceDef);
+		long finish = System.currentTimeMillis();
+		long total = finish - start;
+		double totalSegundos = total/1000;
+		System.out.println("Tempo total com alteração do BusinessService " + bsQuery.getLocalName() + " : " + totalSegundos + " segundos." );
+	}
+	
+	public static void dontUpdateBiz(
+			long start,
+			BusinessServiceQuery bsQuery) {
+		long finish = System.currentTimeMillis();
+		long total = finish - start;
+		double totalSegundos = total/1000;
+		System.out.println("Tempo total sem alteração do BusinessService " + bsQuery.getLocalName() + " : " + totalSegundos + " segundos." );
+		System.out.println("BusinessService " +bsQuery.getLocalName() + " nao foi alterado.");
 	}
 
 	public static JMXConnector initConnection(String hostname, int port,
