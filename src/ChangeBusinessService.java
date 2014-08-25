@@ -135,10 +135,10 @@ public class ChangeBusinessService {
 							break;
 							
 						case 2:
-							if ( httpEndPointConf.getConnectionTimeout() == null 	|| !httpEndPointConf.getConnectionTimeout().equals(5) ) {
-								outboundProps = httpEndPointConf
-								.getOutboundProperties();
-								
+							
+							outboundProps = httpEndPointConf.getOutboundProperties();
+							
+							if ( outboundProps.getConnectionTimeout() != 5 ) {						
 								// setando connection timeout
 								outboundProps
 								.setConnectionTimeout(connectionTimeout);
@@ -151,13 +151,11 @@ public class ChangeBusinessService {
 							break;
 							
 						case 3:
-							if (( httpEndPointConf.getDispatchPolicy() == null 		|| !httpEndPointConf.getDispatchPolicy().equalsIgnoreCase(workmanager) ) || 
-						( httpEndPointConf.getConnectionTimeout() == null 	|| !httpEndPointConf.getConnectionTimeout().equals(5) )) {
+							outboundProps = httpEndPointConf.getOutboundProperties();
+							if 		(( httpEndPointConf.getDispatchPolicy() == null 	|| !httpEndPointConf.getDispatchPolicy().equalsIgnoreCase(workmanager) ) || 
+									 ( outboundProps.getConnectionTimeout() != 5 )) {
 								// setando o workmanager
 								httpEndPointConf.setDispatchPolicy(workmanager);
-								
-								outboundProps = httpEndPointConf
-										.getOutboundProperties();
 								
 								// setando connection timeout
 								outboundProps
@@ -169,10 +167,9 @@ public class ChangeBusinessService {
 								dontUpdateBiz(start, bsQuery);
 							}
 							break;
+						}
 					}
-
 				}
-
 			}
 			if(contador == 0){
 				sm.discardSession(sess1);
@@ -212,7 +209,8 @@ public class ChangeBusinessService {
 			com.bea.wli.config.Ref bsRef,
 			com.bea.wli.sb.services.ServiceDefinition serviceDef,
 			long start,
-			BusinessServiceQuery bsQuery) {
+			BusinessServiceQuery bsQuery) 
+	throws Exception{
 		httpEndPointConf.setOutboundProperties(outboundProps);
 		endpointConfigration
 				.setProviderSpecific(httpEndPointConf);
