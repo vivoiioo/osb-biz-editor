@@ -10,13 +10,13 @@ classpath=${MW_HOME}/domains/OSB_VIVO360_1_PROD/scripts/teste/bin:${MW_HOME}/mod
 echo $classpath
 
 sessao=bizWM
-host=brtlvlts0252sl
-port=7000
+host=aidamina
+port=10000
 username=admWLS
-password=0s6Vivo360##Pr0d
+password=0sbL3g@cyPR3@11
 workmanager=BusinessServices.WorkManager
 connectionTimeout=5
-operacaoTimeout=36000000
+operacaoTimeout=300000
 data=$(date '+%Y%m%d%H%M%S')
 
 ##################################
@@ -26,6 +26,6 @@ data=$(date '+%Y%m%d%H%M%S')
 #   All = 3                      #
 ##################################
 
-operacao=3
+operacao=1
 
 java -cp ${classpath} -Dweblogic.MaxMessageSize=30000000 ChangeBusinessService ${sessao} ${host} ${port} ${username} ${password} ${workmanager} ${connectionTimeout} ${operacao} ${operacaoTimeout} > ./saidaScript.${data}.out
